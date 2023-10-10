@@ -36,7 +36,7 @@ import the data from database
 library(p8105.datasets)
 data("instacart")
 ```
-The goal is to do some exploration of this dataset. To that end, write a short description of the dataset, noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations. Then, do or answer the following (commenting on the results of each):
+**The goal is to do some exploration of this dataset. To that end, write a short description of the dataset, noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations. Then, do or answer the following (commenting on the results of each):**
 
 this dataframe is a dataset which has `r nrow(instacart)` observations and `r ncol(instacart)` variables. This dataset is used to record some informations about Instacart which is an online grocery service. There're some important variables in this dataset: `r names(instacart)`. The explanation of each variable is as fallow:
 - order_id: order identifier
@@ -68,4 +68,36 @@ this dataframe is a dataset which has `r nrow(instacart)` observations and `r nc
 - aisle: the name of the aisle
 
 - department: the name of the department
+
+**How many aisles are there, and which aisles are the most items ordered from?**
+
+```{r}
+instacart |> 
+  group_by(aisle) |> 
+  summarize(n_obs = n()) |> 
+  arrange(desc(n_obs))
+```
+
+There are `r instacart |> count(aisle) |> pull(n) |> length()` aisles among which the `fresh vegetables` is the most popular.
+
+**Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.**
+
+```{r}
+instacart |> 
+  group_by(aisle) |> 
+  summarize(n_obs = n()) |> 
+  filter(n_obs > 10000) |> 
+  arrange(desc(n_obs)) |> 
+  ggplot(aes(x = aisle, y = n_obs)) + geom_col()+
+  labs(
+    title = "commodity numbers",
+    x = "aisle",
+    y = "counts",
+    caption = "aisles with more than 10000 items"
+  ) +
+  theme(
+    axis.text.x = element_text(
+      angle = 45, vjust = 1, hjust = 1) )
+```
+
 
