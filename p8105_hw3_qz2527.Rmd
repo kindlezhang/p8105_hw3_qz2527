@@ -28,4 +28,13 @@ options(
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
+## Problem 1
+
+import the data from database
+
+```{r}
+library(p8105.datasets)
+data("instacart")
+```
+The goal is to do some exploration of this dataset. To that end, write a short description of the dataset, noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations. Then, do or answer the following (commenting on the results of each):
 
