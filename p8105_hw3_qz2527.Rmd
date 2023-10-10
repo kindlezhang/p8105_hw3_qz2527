@@ -100,4 +100,44 @@ instacart |>
       angle = 45, vjust = 1, hjust = 1) )
 ```
 
+**Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.**
+
+```{r}
+
+instacart |> 
+  filter(aisle == "baking ingredients" | aisle == "dog food care"| aisle == "packaged vegetables fruits") |> 
+  group_by(aisle, product_name) |> 
+  summarise(n_obs = n()) |> 
+  arrange(desc(n_obs)) |> 
+  filter(row_number() <= 3) |> 
+  knitr::kable(digits = 2)
+```
+
+**Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).**
+
+```{r}
+instacart |> 
+  select(product_name, order_dow, order_hour_of_day) |> 
+  filter(product_name == "Pink Lady Apples" | product_name == "Coffee Ice Cream") |> 
+  group_by(product_name, order_dow) |> 
+  summarise(mean_hour = mean(order_hour_of_day)) |> 
+  mutate(
+    order_dow = case_match(
+      order_dow,
+      0 ~ "Monday",
+      1 ~ "Tuesday",
+      2 ~ "Wednesday",
+      3 ~ "Thursday",
+      4 ~ "Friday",
+      5 ~ "Saturday",
+      6 ~ "Sunday"
+    )
+  ) |> 
+  rename(week_day = order_dow) |> 
+  pivot_wider(
+    names_from = week_day,
+    values_from = mean_hour
+  ) |> 
+  knitr::kable(digits = 2)
+```
 
