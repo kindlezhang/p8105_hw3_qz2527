@@ -213,6 +213,13 @@ brfss_smart2010 |>
     color = "State",
     caption = "average data_value over time"
   )
-  
+```
+
+we can find from the image that the average value differs slightly over time with an approximate range from 15 to 30.
+
+- Make a two-panel plot showing, for the years 2006, and 2010, distribution of `data_value` for responses (“Poor” to “Excellent”) among locations in NY State.
+
+```{r}
+
 ```
 
