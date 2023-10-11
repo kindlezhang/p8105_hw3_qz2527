@@ -604,6 +604,142 @@ data(&quot;brfss_smart2010&quot;)</code></pre>
 <li><p>organize responses as a factor taking levels ordered from “Poor”
 to “Excellent”</p></li>
 </ul>
+<pre class="r"><code>brfss_smart2010 = 
+  brfss_smart2010 |&gt; 
+    janitor::clean_names() |&gt; 
+    select(year, locationabbr, locationdesc, topic, response, sample_size, data_value, display_order, geo_location) |&gt; 
+  filter(topic == &quot;Overall Health&quot;) |&gt; 
+  arrange(year, locationdesc, desc(display_order)) |&gt; 
+  mutate(response = as.factor(response))</code></pre>
+<p><strong>Using this dataset, do or answer the following (commenting on
+the results of each):</strong></p>
+<ul>
+<li>In 2002, which states were observed at 7 or more locations? What
+about in 2010?</li>
+</ul>
+<pre class="r"><code>brfss_smart2010 |&gt; 
+  filter(year == 2002) |&gt; 
+  group_by(locationabbr) |&gt; 
+  summarise(n_obs = n()/5) |&gt; 
+  filter(n_obs &gt;= 7) |&gt; 
+  arrange(desc(n_obs)) |&gt; 
+  knitr::kable(digits = 2)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">locationabbr</th>
+<th align="right">n_obs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PA</td>
+<td align="right">10</td>
+</tr>
+<tr class="even">
+<td align="left">MA</td>
+<td align="right">8</td>
+</tr>
+<tr class="odd">
+<td align="left">NJ</td>
+<td align="right">8</td>
+</tr>
+<tr class="even">
+<td align="left">CT</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">FL</td>
+<td align="right">7</td>
+</tr>
+<tr class="even">
+<td align="left">NC</td>
+<td align="right">7</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>brfss_smart2010 |&gt; 
+  filter(year == 2010) |&gt; 
+  group_by(locationabbr) |&gt; 
+  summarise(n_obs = n()/5) |&gt; 
+  filter(n_obs &gt;= 7) |&gt; 
+  arrange(desc(n_obs)) |&gt; 
+  knitr::kable(digits = 2)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">locationabbr</th>
+<th align="right">n_obs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">FL</td>
+<td align="right">41</td>
+</tr>
+<tr class="even">
+<td align="left">NJ</td>
+<td align="right">19</td>
+</tr>
+<tr class="odd">
+<td align="left">TX</td>
+<td align="right">16</td>
+</tr>
+<tr class="even">
+<td align="left">CA</td>
+<td align="right">12</td>
+</tr>
+<tr class="odd">
+<td align="left">MD</td>
+<td align="right">12</td>
+</tr>
+<tr class="even">
+<td align="left">NC</td>
+<td align="right">12</td>
+</tr>
+<tr class="odd">
+<td align="left">NE</td>
+<td align="right">10</td>
+</tr>
+<tr class="even">
+<td align="left">WA</td>
+<td align="right">10</td>
+</tr>
+<tr class="odd">
+<td align="left">MA</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">NY</td>
+<td align="right">9</td>
+</tr>
+<tr class="odd">
+<td align="left">OH</td>
+<td align="right">8</td>
+</tr>
+<tr class="even">
+<td align="left">CO</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">PA</td>
+<td align="right">7</td>
+</tr>
+<tr class="even">
+<td align="left">SC</td>
+<td align="right">7</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Construct a dataset that is limited to <code>Excellent</code>
+responses, and contains, year, state, and a variable that averages the
+<code>data_value</code> across locations within a state. Make a
+“spaghetti” plot of this average value over time within a state (that
+is, make a plot showing a line for each state across years – the
+<code>geom_line</code> geometry and <code>group</code> aesthetic will
+help).</li>
+</ul>
 </div>
 
 
