@@ -253,3 +253,33 @@ data_final =
               education = as.factor(education))
 ```
 
+**Produce a reader-friendly table for the number of men and women in each education category, and create a visualization of the age distributions for men and women in each education category. Comment on these items.**
+
+```{r}
+data_final |> 
+  group_by(sex, education) |> 
+  summarize(n_obs = n()) |> 
+  pivot_wider(
+    names_from = sex,
+    values_from = n_obs
+  ) |> 
+  knitr::kable(digits = 2)
+
+data_final |> 
+  ggplot(aes(x = age, fill = sex)) + geom_histogram() +
+  facet_grid(. ~ education) + 
+  labs(
+    title = "age distribution",
+    x = "age",
+    y = "counts",
+    caption = "two gender and three educational level"
+  )
+
+data_final |> 
+  ggplot(aes(x = age, y = sex))+ geom_density_ridges()+
+  facet_grid(. ~ education)
+```
+
+according to the table and picture we got above, we can find. In the education level 1 and 3, the number of female and male nearly equal to each other. However, in the level 2, male's number is larger. What's more, younger people is more likely to have a higher eduction level. 
+
+
