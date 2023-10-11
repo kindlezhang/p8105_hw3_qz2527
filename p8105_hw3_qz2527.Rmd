@@ -237,3 +237,19 @@ data_dp = read_csv("./data_file/nhanes_covar.csv", skip = 4) |>
 data_mims = read_csv("./data_file/nhanes_accel.csv") |> janitor::clean_names()
 ```
 
+**Load, tidy, merge, and otherwise organize the data sets. Your final dataset should include all originally observed variables; exclude participants less than 21 years of age, and those with missing demographic data; and encode data with reasonable variable classes (i.e. not numeric, and using factors with the ordering of tables and plots in mind).**
+
+```{r}
+data_final = 
+  left_join(data_dp, data_mims, by = "seqn") |> 
+  filter(age >= 21) |> 
+  drop_na(sex, age, bmi, education) |> 
+  mutate(
+    sex = case_match(
+      sex,
+      1 ~ "male", 
+      2 ~ "female")
+  ) |> mutate(sex = as.factor(sex),
+              education = as.factor(education))
+```
+
