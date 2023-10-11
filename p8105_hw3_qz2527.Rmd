@@ -220,6 +220,20 @@ we can find from the image that the average value differs slightly over time wit
 - Make a two-panel plot showing, for the years 2006, and 2010, distribution of `data_value` for responses (“Poor” to “Excellent”) among locations in NY State.
 
 ```{r}
+brfss_smart2010 |> 
+  filter(year == 2006 | year == 2010) |> 
+  filter(locationabbr == "NY") |> 
+  select(year, locationdesc, response, data_value)
+```
 
+## Problem 3
+
+import the data
+
+```{r}
+data_dp = read_csv("./data_file/nhanes_covar.csv", skip = 4) |> 
+  janitor::clean_names()
+
+data_mims = read_csv("./data_file/nhanes_accel.csv") |> janitor::clean_names()
 ```
 
