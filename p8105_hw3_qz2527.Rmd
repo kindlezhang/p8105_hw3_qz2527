@@ -206,7 +206,13 @@ brfss_smart2010 |>
   ) |> 
   group_by(locationabbr, year, mean_value) |> 
   summarise() |> 
-  ggplot(aes(x = year, y = mean_value, color = locationabbr)) + geom_line()
+  ggplot(aes(x = year, y = mean_value, color = locationabbr)) + geom_line() + labs(
+    title = "A “spaghetti” plot",
+    x = "year",
+    y = "data_value",
+    color = "State",
+    caption = "average data_value over time"
+  )
   
 ```
 
