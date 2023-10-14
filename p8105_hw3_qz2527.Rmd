@@ -231,6 +231,8 @@ brfss_smart2010 |>
   facet_grid(. ~ year)
 ```
 
+In the year 2005, we can find there are three counties whose data_value is concentrate. In the year 2010, another 3 counties are more concentrate. 
+
 ## Problem 3
 
 import the data
