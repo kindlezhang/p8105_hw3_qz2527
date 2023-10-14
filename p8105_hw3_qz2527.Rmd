@@ -2,7 +2,7 @@
 title: "p8105_hw3_qz2527"
 author: "kindle zhang"
 date: "2023-10-10"
-output: html_document
+output: github_document
 ---
 
 ```{r, include = FALSE, message = FALSE, warning = FALSE}
