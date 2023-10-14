@@ -167,7 +167,9 @@ brfss_smart2010 =
     select(year, locationabbr, locationdesc, topic, response, sample_size, data_value, display_order, geo_location) |> 
   filter(topic == "Overall Health") |> 
   arrange(year, locationdesc, desc(display_order)) |> 
-  mutate(response = as.factor(response))
+  mutate(
+    response = fct_reorder(response, display_order, .na_rm = FALSE)
+  )
 ```
 
 **Using this dataset, do or answer the following (commenting on the results of each):**
@@ -223,7 +225,9 @@ we can find from the image that the average value differs slightly over time wit
 brfss_smart2010 |> 
   filter(year == 2006 | year == 2010) |> 
   filter(locationabbr == "NY") |> 
-  select(year, locationdesc, response, data_value)
+  select(year, locationdesc, response, data_value) |> 
+  ggplot(aes(x = data_value, fill = locationdesc)) +            geom_density(alpha = .4, color = "blue") + 
+  facet_grid(. ~ year)
 ```
 
 ## Problem 3
@@ -231,10 +235,12 @@ brfss_smart2010 |>
 import the data
 
 ```{r}
-data_dp = read_csv("./data_file/nhanes_covar.csv", skip = 4) |> 
+data_dp = 
+  read_csv("./data_file/nhanes_covar.csv", skip = 4) |> 
   janitor::clean_names()
 
-data_mims = read_csv("./data_file/nhanes_accel.csv") |> janitor::clean_names()
+data_mims = 
+  read_csv("./data_file/nhanes_accel.csv") |>                janitor::clean_names()
 ```
 
 **Load, tidy, merge, and otherwise organize the data sets. Your final dataset should include all originally observed variables; exclude participants less than 21 years of age, and those with missing demographic data; and encode data with reasonable variable classes (i.e. not numeric, and using factors with the ordering of tables and plots in mind).**
@@ -248,9 +254,23 @@ data_final =
     sex = case_match(
       sex,
       1 ~ "male", 
-      2 ~ "female")
-  ) |> mutate(sex = as.factor(sex),
-              education = as.factor(education))
+      2 ~ "female"),
+    education = case_match(
+      education,
+      1 ~ "low",
+      2 ~ "medium",
+      3 ~ "high"
+    )
+  )|> 
+  mutate(
+    sex = fct_relevel(
+      sex,
+      c("male", "female")
+    ),
+    education = fct_relevel(
+      education, 
+      c("low", "medium", "high"))
+  )
 ```
 
 **Produce a reader-friendly table for the number of men and women in each education category, and create a visualization of the age distributions for men and women in each education category. Comment on these items.**
@@ -266,7 +286,8 @@ data_final |>
   knitr::kable(digits = 2)
 
 data_final |> 
-  ggplot(aes(x = age, fill = sex)) + geom_histogram() +
+  ggplot(aes(x = age, fill = sex)) + 
+  geom_histogram(position = "dodge", binwidth = 10) +
   facet_grid(. ~ education) + 
   labs(
     title = "age distribution",
@@ -276,10 +297,84 @@ data_final |>
   )
 
 data_final |> 
-  ggplot(aes(x = age, y = sex))+ geom_density_ridges()+
+  ggplot(aes(x = age, y = sex)) + 
+  geom_density_ridges(scale = .85) +
   facet_grid(. ~ education)
 ```
 
-according to the table and picture we got above, we can find. In the education level 1 and 3, the number of female and male nearly equal to each other. However, in the level 2, male's number is larger. What's more, younger people is more likely to have a higher eduction level. 
+according to the table and picture we got above, we can find. In the education level 1 and 3, the number of female and male nearly equal to each other. However, in the level 2, male's number is larger. What's more, younger people is more likely to have a higher education level. 
 
+**Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each participant. Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level. Include a trend line or a smooth to illustrate differences. Comment on your plot.**
 
+```{r}
+data_final_total = 
+  data_final |> 
+    pivot_longer(
+      min1:min1440,
+      names_to = "time",
+      values_to = "act"
+    ) |> 
+    group_by(seqn) |> 
+    summarise(
+      total_act = round(sum(act, na.rm = TRUE), digit = 0)
+    )
+
+data_final_new = 
+  left_join(data_final, data_final_total, by = "seqn") |> 
+  select(seqn, sex, age, bmi,education, total_act)
+
+data_final_new |> 
+  ggplot(aes(x = age, y = total_act, color = sex)) +
+  geom_point(alpha = .4) + 
+  geom_smooth(se = FALSE) +
+  facet_grid(. ~ education) +
+  labs(
+    title = "total activity vs age",
+    x = "age",
+    y = "total activities in one day",
+    color = "gender",
+    caption = "thress groups according to education level"
+  )
+```
+
+according to the picture, we can conclude two conclusions:
+1, In general, if a person's age is larger, the total activity in one day will be smaller.
+2, In medium and high education level, the female has a overall higher total activities level than the male participants.  
+
+**Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences.**
+
+```{r}
+data_final |> 
+  pivot_longer(
+      min1:min1440,
+      names_to = "time",
+      values_to = "act"
+    ) |>
+  separate(time, into = c("time_1", "time_2"), sep = 3) |> 
+  mutate(time_2 = as.numeric(time_2)) |> 
+  group_by(sex, education, time_2) |> 
+  summarise(
+    n_obs= n(),
+    mean_act = mean(act, na.rm = TRUE)
+  ) |> 
+  select(education,everything()) |> 
+  ggplot(aes(x = time_2, y = mean_act, color = sex)) +
+  geom_point(alpha = .2) +
+  geom_smooth(se = FALSE) +
+  facet_grid(education ~ .) +
+  labs(
+    title = "activity over time",
+    x = "timeline",
+    y = "mean activities every minute",
+    color = "gender",
+    caption = "thress groups according to education level"
+  ) +
+  scale_x_continuous(
+    breaks = c( 0, 360, 720, 1080, 1440),
+    labels = c("0h", "6h", "12h", "18h", "24h")
+    )
+```
+
+according to the picture, we can conclude two conclusions:
+1, In general, 6am is the time point when a person's activity is lowest. The average activity level gradually increases from 6am and reach the peak around 12am. In the afternoon, the average activity level decreases slowly. 
+2, In medium and high education level, the female has a overall higher average activities level than the male participants. 
