@@ -214,7 +214,8 @@ brfss_smart2010 |>
     y = "data_value",
     color = "State",
     caption = "average data_value over time"
-  )
+  )+
+  theme(legend.position = "right")
 ```
 
 we can find from the image that the average value differs slightly over time with an approximate range from 15 to 30.
